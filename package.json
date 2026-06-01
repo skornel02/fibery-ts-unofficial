@@ -1,0 +1,32 @@
+{
+  "name": "@skornel02/fibery-ts-unofficial",
+  "version": "0.1.0",
+  "description": "Unofficial Fibery TypeScript SDK",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "tsdown": "^0.22.0",
+    "typescript": "^6.0.0",
+    "vite": "^8.0.15",
+    "vitest": "^4.0.0"
+  },
+  "volta": {
+    "node": "24.14.1"
+  }
+}
