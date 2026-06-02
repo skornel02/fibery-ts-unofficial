@@ -1,12 +1,14 @@
+import { FetchFn } from './types.js';
+
 export class Document {
     private _host: string;
     private _token: string;
-    private _fetch: typeof fetch;
+    private _fetch: FetchFn;
     private _endpoint: string;
     private _batchEndpoint: string;
     public FORMATS: string[];
 
-    constructor(host: string, token: string, fetchFn: typeof fetch) {
+    constructor(host: string, token: string, fetchFn: FetchFn) {
         this._host = host;
         this._token = token;
         this._fetch = fetchFn;

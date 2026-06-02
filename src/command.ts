@@ -4,37 +4,19 @@ import Type from "./type.js";
 import Field from "./field.js";
 // @ts-ignore
 import Entity from "./entity.js";
-
-export interface FiberyErrorResult {
-  name: string;
-  message: string;
-  data: any;
-}
-
-export interface FiberySuccessResponse<T = any> {
-  success: true;
-  result: T;
-}
-
-export interface FiberyErrorResponse {
-  success: false;
-  result: FiberyErrorResult;
-}
-
-export type FiberyResponse<T = any> =
-  | FiberySuccessResponse<T>
-  | FiberyErrorResponse;
-
-export interface CommandArgs {
-  command: string;
-  args: any;
-}
+import { APIError, FiberyCommandError } from "./errors.js";
+import {
+  FiberyCommandExecutionError,
+  FiberyResponse,
+  FiberySuccessResponse,
+  FetchFn,
+} from "./types.js";
 
 export class Command {
   private _host: string;
   private _token: string;
   private _commandsEndpoint: string;
-  private _fetch: typeof fetch;
+  private _fetch: FetchFn;
 
   public createTypeBatchCmd: any;
   public renameTypeBatchCmd: any;
@@ -51,11 +33,16 @@ export class Command {
   public removeFromEntityCollectionFieldBatchCmds: any;
   public deleteEntityBatchCmds: any;
 
-  constructor(host: string, token: string, fetchFn: typeof fetch) {
+  constructor(host: string, token: string, fetchFn: FetchFn) {
     this._host = host;
     this._token = token;
     this._fetch = fetchFn;
-    this._commandsEndpoint = "/api/commands";
+
+    const endpointUrl = new URL("/api/commands", `https://${host}`);
+    if (endpointUrl.protocol !== "https:") {
+      endpointUrl.protocol = "https:";
+    }
+    this._commandsEndpoint = endpointUrl.toString();
 
     this.createTypeBatchCmd = Type.commands.createTypeBatchCmd;
     this.renameTypeBatchCmd = Type.commands.renameTypeBatchCmd;
@@ -76,55 +63,41 @@ export class Command {
   }
 
   async executeBatch<T = any>(commands: CommandArgs[]): Promise<T[]> {
-    const response = await this._fetch(
-      "https://" + this._host + this._commandsEndpoint,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Token ${this._token}`,
-          "X-Client": "Unofficial JS",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(commands),
+    const response = await this._fetch(this._commandsEndpoint, {
+      method: "POST",
+      headers: {
+        Authorization: `Token ${this._token}`,
+        "X-Client": "Unofficial TS",
+        "Content-Type": "application/json",
       },
-    );
+      body: JSON.stringify(commands),
+    });
 
     if (!response.ok) {
-      if (response.status === 401) {
-        throw new Error("Unauthorized");
-      } else if (response.status === 429) {
-        throw new Error(await response.text());
-      } else if (response.status === 500) {
-        let errorData;
-        try {
-          errorData = await response.json();
-        } catch (e) {
-          errorData = null;
-        }
-        if (errorData && errorData.message) {
-          throw new Error(`Server error: ${errorData.message}`);
-        }
-        throw new Error(
-          "Unknown command name, malformed JSON body, or unexpected server error",
-        );
-      }
-      throw new Error(`HTTP Error ${response.status}`);
+      const errorText = await response.text();
+      throw new APIError(
+        `Executing ${commands.length} commands failed! Response: ${errorText}`,
+        {
+          status: response.status,
+          payload: errorText,
+        },
+      );
     }
 
     const data = (await response.json()) as FiberyResponse<T>[];
 
-    const errors = data.reduce<string[]>((acc, res, i) => {
+    const errors = data.reduce<FiberyCommandExecutionError[]>((acc, res, i) => {
       if (!res.success) {
-        const errorMessage = res.result?.message || "Unknown error";
-        return acc.concat(
-          `Error while executing command '${commands[i].command}': ${errorMessage}`,
-        );
+        return acc.concat({
+          command: commands[i],
+          error: res.result,
+        });
       }
       return acc;
     }, []);
 
     if (errors.length) {
-      throw new Error(errors.join("\n"));
+      throw new FiberyCommandError(`One or more commands failed!`, { errors });
     }
 
     return data.map((res) => (res as FiberySuccessResponse<T>).result);

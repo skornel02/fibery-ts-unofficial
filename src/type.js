@@ -88,7 +88,7 @@ const DOMAIN_TYPE_FIELDS = [
         'fibery/name': `fibery/name`,
         'fibery/type': 'fibery/text',
         'fibery/meta': {
-            'fibery/secured?': false,
+            'fibery/secured?': true,
             'ui/title?': true
         }
     },

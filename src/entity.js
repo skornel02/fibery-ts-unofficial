@@ -1,5 +1,11 @@
 const checkRequiredArgs = require('./helpers').checkRequiredArgs;
 
+/**
+ * 
+ * @param {import('./types').FiberyQuery} query 
+ * @param {import('./types').FiberyQueryParams} params 
+ * @returns 
+ */
 function queryEntityCmd(query, params = null) {
     checkRequiredArgs('Select Entities', ['q/from', 'q/select'], [query]);
 
@@ -11,6 +17,12 @@ function queryEntityCmd(query, params = null) {
 
 // TODO: select rich text
 
+/**
+ * 
+ * @template T
+ * @param {import('./types').FiberyCreateEntity<T>[]} argsArray 
+ * @returns {import('./types').FiberyEntity<T>[]}
+ */
 function createEntityBatchCmds(argsArray) {
     checkRequiredArgs('Create Entities', ['type', 'entity'], argsArray);
 
@@ -22,6 +34,12 @@ function createEntityBatchCmds(argsArray) {
 
 // TODO: create with rich text
 
+/**
+ * 
+ * @template T
+ * @param {import('./types').FiberyUpdateEntity<T>[]} argsArray 
+ * @returns {import('./types').FiberyEntity<T>[]}
+ */
 function updateEntityBatchCmds(argsArray) {
     checkRequiredArgs('Update Entities', ['fibery/id'], argsArray.map(args => args.entity));
 
@@ -51,6 +69,11 @@ function removeFromEntityCollectionFieldBatchCmds(argsArray) {
     }));
 }
 
+/**
+ * 
+ * @param {import('./types').FiberyCreateEntity<{}>[]} argsArray 
+ * @returns {null[]}
+ */
 function deleteEntityBatchCmds(argsArray) {
     checkRequiredArgs('Delete Entities', ['type', 'entity'], argsArray);
 

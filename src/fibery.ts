@@ -9,6 +9,13 @@ import Entity from "./entity.js";
 import File from "./file.js";
 // @ts-ignore
 import Document from "./document.js";
+import {
+  FiberyCreateEntity,
+  FiberyEntity,
+  FiberyQuery,
+  FiberyQueryParams,
+  FiberyUpdateEntity,
+} from "./types.js";
 
 export interface FiberyOptions {
   host: string;
@@ -32,12 +39,19 @@ export interface FiberyFieldService {
 }
 
 export interface FiberyEntityService {
-  query(query: any, params?: any): Promise<any>;
-  createBatch(argsArray: any[]): Promise<any[]>;
-  updateBatch(argsArray: any[]): Promise<any[]>;
+  query<T>(
+    query: FiberyQuery,
+    params?: FiberyQueryParams,
+  ): Promise<FiberyEntity<T>[]>;
+  createBatch<T>(
+    argsArray: FiberyCreateEntity<T>[],
+  ): Promise<FiberyEntity<T>[]>;
+  updateBatch<T>(
+    argsArray: FiberyUpdateEntity<T>[],
+  ): Promise<FiberyEntity<T>[]>;
   addToEntityCollectionFieldBatch(argsArray: any[]): Promise<any[]>;
   removeFromEntityCollectionFieldBatch(argsArray: any[]): Promise<any[]>;
-  deleteBatch(argsArray: any[]): Promise<any[]>;
+  deleteBatch(argsArray: FiberyUpdateEntity<{}>[]): Promise<null[]>;
 }
 
 export interface FiberyFileService {
