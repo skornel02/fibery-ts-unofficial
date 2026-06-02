@@ -1,6 +1,6 @@
 {
   "name": "@skornel02/fibery-ts-unofficial",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Unofficial Fibery TypeScript SDK",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
@@ -22,6 +22,7 @@
   "devDependencies": {
     "@types/node": "^25.9.1",
     "bottleneck": "^2.19.5",
+    "dotenv": "^17.4.2",
     "ky": "^2.0.2",
     "tsdown": "^0.22.0",
     "typescript": "^6.0.0",
@@ -30,8 +31,5 @@
   },
   "volta": {
     "node": "24.14.1"
-  },
-  "dependencies": {
-    "dotenv": "^17.4.2"
   }
 }
